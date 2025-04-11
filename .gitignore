@@ -6,3 +6,4 @@ mkdocs/html/
 .idea/
 .vscode/
 .DS_Store
+.venv
