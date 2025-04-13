@@ -17,9 +17,9 @@ import json
 import random
 import re
 import requests
-from Crypto.Cipher import PKCS1_OAEP
-from Crypto.PublicKey import RSA
-from Crypto.Hash import SHA256
+from Cryptodome.Cipher import PKCS1_OAEP
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Hash import SHA256
 import binascii
 
 # 默认Cookie - 可以为空字符串

@@ -1,9 +1,43 @@
 #!/usr/bin/env python3
 """
 B站UP主签名和头像爬取脚本
+=========================
+
+本工具用于定时获取特定B站UP主的个人签名和头像，适合追踪UP主个人资料变化。
+
+功能：
+1. 获取指定UP主的个人签名
+2. 获取指定UP主的头像链接
+3. 记录获取时间，便于追踪变化
+4. 自动管理并刷新B站Cookie，提高请求成功率
+5. 缓存WBI密钥，优化访问效率
+
+使用场景：
+- 定时监控特定UP主资料变化
+- 建立UP主资料历史记录
+- 可配合crontab或systemd timer实现定时执行
+
+技术特性：
+- 支持Cookie自动刷新机制
+- 随机延迟请求，模拟真实用户行为
+- 错误处理和重试机制，提高稳定性
+- 结果以JSON格式保存，便于后续处理
+
+使用方法：
+1. 将脚本配置为定时任务
+2. 数据将保存在 data/up_{mid}_info.json 文件中
+3. 每次运行会更新最新的签名和头像信息
+
+注意事项：
+- 请合理设置运行频率，建议每天1-2次
+- 抓取数据仅用于个人研究，请尊重UP主隐私
+- 需要保持Cookie有效性以获得最佳结果
+
 参考: https://pa.ci/137.html
-功能: 定时获取指定UP主的签名和头像
-使用: 可配合crontab或systemd timer每天执行一次
+
+作者：[您的名字]
+日期：[创建日期]
+版本：1.0
 """
 import requests
 import time
@@ -11,6 +45,8 @@ import json
 import random
 import hashlib
 import os
+# 引入 bilibili_cookie_manager 模块
+from bilibili_cookie_manager import get_cookie, get_headers
 
 # 获取WBI密钥
 def get_wbi_keys():
@@ -267,9 +303,9 @@ def generate_correspond_path(timestamp):
     # 这里需要实现RSA-OAEP加密算法
     # 可以使用第三方库如cryptography或pycryptodome
     # 示例代码(需要安装pycryptodome):
-    from Crypto.Cipher import PKCS1_OAEP
-    from Crypto.PublicKey import RSA
-    from Crypto.Hash import SHA256
+    from Cryptodome.Cipher import PKCS1_OAEP
+    from Cryptodome.PublicKey import RSA
+    from Cryptodome.Hash import SHA256
     import binascii
     
     # B站公钥
@@ -464,14 +500,8 @@ def main():
         os.makedirs(data_dir)
         print(f"创建data目录: {data_dir}")
     
-    # 预设Cookie - 可以为空
-    default_cookie = """buvid3=0F89B1FF-5C5E-5905-3B51-262D96B1B89D85075infoc; b_nut=1715760685; _uuid=35C110C710-9A59-C34D-E4D3-3514B9BAD7B889948infoc; buvid4=FBDE087C-A4D0-2337-BC9B-FA33E631970191450-024051508-3R7ADUTckXdPRXhZSe5vHA%3D%3D; rpdid=|(ull)uJYY|)0J'u~ul~Y|Ym~; buvid_fp_plain=undefined; share_source_origin=copy_web; bmg_af_switch=1; bmg_src_def_domain=i0.hdslb.com; bsource=search_google; header_theme_version=CLOSE; enable_web_push=DISABLE; enable_feed_channel=ENABLE; home_feed_column=5; browser_resolution=1854-934; SESSDATA=a1d089a0%2C1759831774%2Cdd933%2A42CjBzkBVofPpUgRh7dLy0S2eF999YbtfUwnI-YxK2WgXoaBpY7LGNlP7RDUcfUUOPw4MSVkdNMUtnMmFkbnlwb1VfV2ZOdEVyMEdyMkRFUy01TFIxTjBfQmVJemUzU3VhYjJmaXQ0RDhkZWdBWkRla2hIR1dMdmh4OW50VXNGZVA0YXUwdVI2SjF3IIEC; bili_jct=fbd7a3c3fc6a63b39a4d118ce7721c7e; DedeUserID=58333954; DedeUserID__ckMd5=d3ca2c7fca433a27; sid=7ug0li69; b_lsid=D5935655_196220EF641; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ1OTExMTcsImlhdCI6MTc0NDMzMTg1NywicGx0IjotMX0.SGxs5hYPJaB4Mon3ABEkFX0R4MZxArdfbGceqUA9IJU; bili_ticket_expires=1744591057; fingerprint=8b07f8647f05a14fc9d44b550d0cb2cb; buvid_fp=0F89B1FF-5C5E-5905-3B51-262D96B1B89D85075infoc; CURRENT_FNVAL=2000; bp_t_offset_58333954=1054398227601686528"""
-    
-    # 获取用户Cookie
-    user_cookie_dict = get_user_cookie(default_cookie)
-    
-    # 管理Cookie - 检查刷新
-    active_cookie_dict = manage_cookies(user_cookie_dict)
+    # 使用 bilibili_cookie_manager 获取 cookie
+    active_cookie_dict = get_cookie()
     
     if not active_cookie_dict:
         print("没有有效的Cookie，将使用无登录模式请求（可能会受到更多限制）")

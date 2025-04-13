@@ -1,3 +1,38 @@
+#!/usr/bin/env python3
+"""
+B站UP主全部视频数据抓取工具
+============================
+
+本工具用于抓取B站特定UP主的所有视频数据信息。
+
+功能：
+1. 获取指定UP主的所有视频列表
+2. 获取每个视频的详细数据（标题、播放量、点赞、投币等）
+3. 支持WBI签名验证，应对B站的API访问限制
+4. 处理风控验证，提高数据抓取成功率
+5. 结果以JSON格式保存，方便后续分析和处理
+
+使用方法：
+1. 运行脚本后输入UP主的mid（用户ID）
+2. 程序会自动获取该UP主的所有视频信息
+3. 数据将保存在 data 目录下的 up_{mid}_videos_combined.json 文件中
+
+技术特性：
+- 自动控制请求频率，避免触发风控
+- 支持Cookie登录，减少限制
+- 缓存WBI密钥，提高请求效率
+- 自动重试机制，提高抓取成功率
+
+注意事项：
+- 请勿频繁使用，以免对B站服务器造成压力
+- 抓取的数据仅供个人学习和研究使用
+- 大量视频的UP主可能需要较长时间完成抓取
+
+作者：[您的名字]
+日期：[创建日期]
+版本：1.0
+"""
+
 import requests
 import time
 import json
@@ -6,6 +41,8 @@ import hashlib
 import hmac
 import re
 import os
+# 引入 bilibili_cookie_manager 模块
+from bilibili_cookie_manager import get_cookie, get_headers
 
 # 获取UP主所有视频信息
 def get_up_videos(mid, cookie_dict=None, max_pages=100):
@@ -456,48 +493,6 @@ def load_wbi_keys_from_cache():
     
     return None, None
 
-def get_user_cookie(default_cookie=None):
-    """获取用户输入的Cookie"""
-    print("请提供登录B站后的Cookie以减少风控概率")
-    print("提示: 登录B站后，按F12打开开发者工具，在Network标签下查看任意请求的Cookie")
-    print("按Enter键使用默认Cookie")
-    
-    cookie_input = input("请粘贴完整Cookie字符串（直接回车则使用默认Cookie）: ").strip()
-    
-    if not cookie_input and default_cookie:
-        print("使用默认Cookie")
-        cookie_input = default_cookie
-    elif not cookie_input:
-        print("未提供Cookie，将使用默认方式请求")
-        return {}
-    
-    # 解析Cookie字符串为字典
-    cookie_dict = {}
-    try:
-        for item in cookie_input.split(';'):
-            if not item.strip():
-                continue
-            try:
-                key, value = item.strip().split('=', 1)
-                cookie_dict[key.strip()] = value.strip()
-            except ValueError:
-                # 处理没有值的Cookie项
-                continue
-        
-        # 检查是否包含重要Cookie
-        important_cookies = ['bili_jct', 'SESSDATA', 'DedeUserID']
-        missing = [c for c in important_cookies if c not in cookie_dict]
-        
-        if missing:
-            print(f"警告: 缺少重要的Cookie: {', '.join(missing)}")
-        else:
-            print("Cookie格式有效，包含所有重要字段")
-        
-        return cookie_dict
-    except Exception as e:
-        print(f"解析Cookie出错: {e}")
-        return {}
-
 def handle_v_voucher(v_voucher, cookie_dict=None):
     """尝试自动处理v_voucher验证"""
     try:
@@ -546,30 +541,12 @@ def handle_v_voucher(v_voucher, cookie_dict=None):
         return False
 
 if __name__ == "__main__":
-    # 预设Cookie - 使用完整的Cookie字符串
-    default_cookie = """buvid3=0F89B1FF-5C5E-5905-3B51-262D96B1B89D85075infoc; b_nut=1715760685; _uuid=35C110C710-9A59-C34D-E4D3-3514B9BAD7B889948infoc; buvid4=FBDE087C-A4D0-2337-BC9B-FA33E631970191450-024051508-3R7ADUTckXdPRXhZSe5vHA%3D%3D; rpdid=|(ull)uJYY|)0J'u~ul~Y|Ym~; buvid_fp_plain=undefined; share_source_origin=copy_web; bmg_af_switch=1; bmg_src_def_domain=i0.hdslb.com; bsource=search_google; header_theme_version=CLOSE; enable_web_push=DISABLE; enable_feed_channel=ENABLE; home_feed_column=5; browser_resolution=1854-934; SESSDATA=a1d089a0%2C1759831774%2Cdd933%2A42CjBzkBVofPpUgRh7dLy0S2eF999YbtfUwnI-YxK2WgXoaBpY7LGNlP7RDUcfUUOPw4MSVkdNMUtnMmFkbnlwb1VfV2ZOdEVyMEdyMkRFUy01TFIxTjBfQmVJemUzU3VhYjJmaXQ0RDhkZWdBWkRla2hIR1dMdmh4OW50VXNGZVA0YXUwdVI2SjF3IIEC; bili_jct=fbd7a3c3fc6a63b39a4d118ce7721c7e; DedeUserID=58333954; DedeUserID__ckMd5=d3ca2c7fca433a27; sid=7ug0li69; b_lsid=D5935655_196220EF641; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ1OTExMTcsImlhdCI6MTc0NDMzMTg1NywicGx0IjotMX0.SGxs5hYPJaB4Mon3ABEkFX0R4MZxArdfbGceqUA9IJU; bili_ticket_expires=1744591057; fingerprint=8b07f8647f05a14fc9d44b550d0cb2cb; buvid_fp=0F89B1FF-5C5E-5905-3B51-262D96B1B89D85075infoc; CURRENT_FNVAL=2000; bp_t_offset_58333954=1054398227601686528"""
+    # 使用 bilibili_cookie_manager 获取 cookie
+    cookie_dict = get_cookie()
     
-    # 获取用户Cookie
-    user_cookie = get_user_cookie(default_cookie)
+    if not cookie_dict:
+        print("没有有效的Cookie，将使用无登录模式请求（可能会受到更多限制）")
+        cookie_dict = {}
     
-    # 尝试获取最新的WBI密钥
-    bili_ticket, img_key_new, sub_key_new = get_bili_ticket()
-    
-    if img_key_new and sub_key_new:
-        # 验证获取的密钥，只验证一次即可
-        if verify_wbi_keys(img_key_new, sub_key_new):
-            img_key, sub_key = img_key_new, sub_key_new
-            print("已成功验证并更新WBI密钥")
-        else:
-            print("WBI密钥验证失败，使用默认密钥")
-            img_key, sub_key = "7cd084941338484aae1ad9425b84077c", "4932caff0ff746eab6f01bf08b70ac45"
-    else:
-        # 使用默认密钥
-        print("无法获取新的WBI密钥，使用默认密钥")
-        img_key, sub_key = "7cd084941338484aae1ad9425b84077c", "4932caff0ff746eab6f01bf08b70ac45"
-    
-    # 打印最终使用的密钥    
-    print(f"最终使用的WBI密钥: img_key={img_key}, sub_key={sub_key}")
-        
     up_mid = input("请输入UP主的mid: ")
-    main(int(up_mid), cookie_dict=user_cookie)
+    main(int(up_mid), cookie_dict=cookie_dict)
