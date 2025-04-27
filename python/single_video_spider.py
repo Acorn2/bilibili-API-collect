@@ -178,8 +178,34 @@ def main(video_id=None, cookie_dict=None):
         'duration': video_data.get('duration'),  # 视频时长（秒）
         'attribute': video_data.get('attribute'),  # 属性标识
         'length': f"{video_data.get('duration')//60}:{video_data.get('duration')%60:02d}" if video_data.get('duration') else None,  # 时长格式化(分:秒)
-
+        
+        # 添加UP主信息
+        'mid': video_data.get('owner', {}).get('mid'),  # UP主ID
+        'author': video_data.get('owner', {}).get('name'),  # UP主名称
+        'owner_face': video_data.get('owner', {}).get('face'),  # UP主头像URL
+        
+        # 统计信息
+        'play': video_data.get('stat', {}).get('view'),  # 播放量
+        'danmaku': video_data.get('stat', {}).get('danmaku'),  # 弹幕数
+        'comment': video_data.get('stat', {}).get('reply'),  # 评论数
+        'favorite': video_data.get('stat', {}).get('favorite'),  # 收藏数
+        'coin': video_data.get('stat', {}).get('coin'),  # 投币数
+        'share': video_data.get('stat', {}).get('share'),  # 分享数
+        'like': video_data.get('stat', {}).get('like'),  # 点赞数
+        'dislike': video_data.get('stat', {}).get('dislike'),  # 不喜欢数
+        
+        # 分区信息
+        'tid': video_data.get('tid'),  # 分区ID
+        'tname': video_data.get('tname'),  # 分区名称
+        
+        # 标签信息
+        'tags': [tag.get('tag_name') for tag in video_data.get('tag', [])] if video_data.get('tag') else []
     }
+
+    # 获取弹幕信息（如果需要）
+    if video_data.get('cid'):
+        danmaku_count = get_video_danmaku_info(video_data.get('cid'), cookie_dict)
+        formatted_data['danmaku_count'] = danmaku_count  # 这是通过XML解析得到的弹幕数
 
     # 保存为JSON文件
     bvid = formatted_data['bvid']
@@ -226,14 +252,6 @@ if __name__ == "__main__":
         print("没有有效的Cookie，将使用无登录模式请求（可能会受到更多限制）")
         cookie_dict = {}
     
-    # 检查是否有命令行参数
-    if len(sys.argv) > 1:
-        video_id = sys.argv[1]
-        main(video_id, cookie_dict=cookie_dict)
-    else:
-        # 交互模式
-        while True:
-            video_id = input("\n请输入视频BV号或AV号 (输入q退出): ").strip()
-            if video_id.lower() == 'q':
-                break
-            main(video_id, cookie_dict=cookie_dict)
+
+    video_id = 'BV1vVL4zpEAV'
+    main(video_id, cookie_dict=cookie_dict)
