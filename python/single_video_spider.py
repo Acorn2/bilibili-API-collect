@@ -177,7 +177,7 @@ def main(video_id=None, cookie_dict=None):
         'ctime': video_data.get('ctime'),  # 投稿时间戳
         'duration': video_data.get('duration'),  # 视频时长（秒）
         'attribute': video_data.get('attribute'),  # 属性标识
-        'length': f"{video_data.get('duration')//60}:{video_data.get('duration')%60:02d}" if video_data.get('duration') else None,  # 时长格式化(分:秒)
+        'length': video_data.get('duration'),  # 时长格式化(分:秒)
         
         # 添加UP主信息
         'mid': video_data.get('owner', {}).get('mid'),  # UP主ID
