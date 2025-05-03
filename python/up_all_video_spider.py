@@ -146,7 +146,7 @@ def main(mid, cookie_dict=None):
             'aid': video.get('aid'),
             'bvid': video.get('bvid'),
             'title': video.get('title'),
-            'description': video.get('description'),
+            'desc': video.get('description'),  # 修改为 desc 以保持一致
             'pic': video.get('pic'),
             'created': video.get('created'),
             'length': video.get('length'),
@@ -168,6 +168,8 @@ def main(mid, cookie_dict=None):
             # 添加UP主信息
             owner = detail_data.get('owner', {})
             video_data.update({
+                'author': owner.get('name'),
+                'mid': owner.get('mid'),
                 'owner_face': owner.get('face')
             })
             
@@ -182,6 +184,20 @@ def main(mid, cookie_dict=None):
                 'dislike': stat.get('dislike')
             })
             
+            # 添加动态信息
+            video_data['dynamic'] = detail_data.get('dynamic')
+            
+            # 添加分区信息
+            if 'tid' in detail_data:
+                video_data['tid'] = detail_data.get('tid')
+                video_data['tname'] = detail_data.get('tname')
+            
+            # 添加CID
+            video_data['cid'] = detail_data.get('cid')
+            
+            # 添加视频标签
+            if 'tag' in detail_data:
+                video_data['tags'] = detail_data.get('tag').split(',')
         
         formatted_videos.append(video_data)
         time.sleep(1)  # 避免请求过于频繁

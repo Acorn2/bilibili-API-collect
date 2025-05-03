@@ -508,7 +508,7 @@ def main():
         active_cookie_dict = {}
     
     # 获取UP主mid
-    up_mid = 13265324
+    up_mid = 23947287
     
     try:
         # 获取UP主信息
