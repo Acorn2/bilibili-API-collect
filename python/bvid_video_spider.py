@@ -27,17 +27,7 @@ from bilibili_cookie_manager import get_cookie, get_headers
 
 # 默认的BV号列表
 DEFAULT_BVIDS = [
-    "BV1bR4y1x7RP", "BV1pVrWY2EJK", "BV1h1421t7Fc", "BV1aD421M71A", 
-    "BV112421A7pE", "BV14g4y1r71P", "BV1DC4y1q7db", "BV18u411j7EX", 
-    "BV1rM4y1e7XK", "BV1Qv4y177CS", "BV1boyzYVEge", "BV1A8411w723", 
-    "BV1Z8411A74n", "BV1VV4y1P76f", "BV1kv4y1d7Y8", "BV1Je4y1W7Qn", 
-    "BV1Wm4y1w7F3", "BV1aV4y1N71f", "BV11t4y1J7wU", "BV1Rg411Z7LV", 
-    "BV16a411S7cy", "BV1Sa411W7fw", "BV1cT411573g", "BV1vY4y147Nk", 
-    "BV1dR4y1N7Qx", "BV1x94y1f7x4", "BV13Y411n7Dd", "BV1c34y127nL", 
-    "BV1aa411r7aQ", "BV1vQ4y1U79r", "BV1fq4y1z7q1", "BV1oq4y1Z71x", 
-    "BV1W64y1U71j", "BV11i4y1L7QQ","BV1NZ421T7Fa","BV1pH4y1k7EJ",
-    "BV16a4y1Q7by","BV1cG4y147t7","BV1h94y1X7GT","BV1ia411j7Eq",
-    "BV1o54y1f7JM","BV1gb4y1U7vV","BV1qq4y1j7Lt","BV1UV411Y7hA"
+    "BV1obGrzoEmM", "BV11tVczFExN"
 ]
 
 # 获取单个视频的详细信息
